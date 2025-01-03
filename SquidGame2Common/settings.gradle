@@ -1,0 +1,4 @@
+rootProject.name = 'SquidGame2Common'
+
+include ':SquidGameMod', ':SquidGame2Common'
+
