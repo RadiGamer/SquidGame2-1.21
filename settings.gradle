@@ -1,0 +1,17 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'SquidGame2'
+
+include ':SquidGamePacket'
+include ':SquidGameMod'
+include ':SquidGame2Common'
+project(':SquidGame2Common').projectDir = file('SquidGame2Common')

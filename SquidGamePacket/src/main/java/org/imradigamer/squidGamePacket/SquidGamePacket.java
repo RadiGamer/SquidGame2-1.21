@@ -1,31 +1,32 @@
 package org.imradigamer.squidGamePacket;
 
+import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.exceptions.PacketInstantiationException;
 import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.exceptions.PacketSerializationException;
 import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.IPacket;
-
 import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.PacketTCP;
 import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.packet.ScreenPacket;
+import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteStreams;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
-import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 
 public final class SquidGamePacket extends JavaPlugin implements PluginMessageListener {
 
     @Override
     public void onEnable() {
+        // Register the outgoing and incoming plugin channels
+        this.getServer().getMessenger().registerOutgoingPluginChannel(this, PacketTCP.PACKET_CHANNEL);
+        this.getServer().getMessenger().registerIncomingPluginChannel(this, PacketTCP.PACKET_CHANNEL, this);
 
-        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "squidgame2:open_screen");
-        this.getServer().getMessenger().registerIncomingPluginChannel(this, "squidgame2:open_screen", this);
-
-        // 2) Register the "/screen" command executor
+        // Register the "/screen" command executor
         if (getCommand("screen") != null) {
             getCommand("screen").setExecutor(this);
         }
@@ -53,10 +54,12 @@ public final class SquidGamePacket extends JavaPlugin implements PluginMessageLi
             sender.sendMessage("Player " + playerName + " is not online!");
             return true;
         }
-        sendStringScreenPacketToClient((Player) sender, minigame);
+
+        sendStringScreenPacketToClient(target, minigame);
         return true;
     }
-    public static void sendStringScreenPacketToClient(Player targetPlayer,String string) {
+
+    public static void sendStringScreenPacketToClient(Player targetPlayer, String string) {
         try {
             IPacket packet = new ScreenPacket(string);
             packetSendInfo(packet, targetPlayer);
@@ -65,6 +68,7 @@ public final class SquidGamePacket extends JavaPlugin implements PluginMessageLi
             throw new RuntimeException(e);
         }
     }
+
     public static SquidGamePacket getInstance() {
         return getPlugin(SquidGamePacket.class);
     }
@@ -74,7 +78,33 @@ public final class SquidGamePacket extends JavaPlugin implements PluginMessageLi
     }
 
     @Override
-    public void onPluginMessageReceived(@NotNull String channel, @NotNull Player player, @NotNull byte[] message) {
+    public void onPluginMessageReceived(String channel, Player player, byte[] message) {
+        if (!channel.equals(PacketTCP.PACKET_CHANNEL)) {
+            return;
+        }
+        try (DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(message))) {
+            ByteArrayDataInput dataInput = ByteStreams.newDataInput(inputStream.readAllBytes());
 
+            // Deserialize the packet
+            IPacket packet = PacketTCP.read(dataInput);
+            handlePacket(packet, player);
+        } catch (IOException | PacketSerializationException e) {
+            getLogger().severe("Error while processing incoming packet: " + e.getMessage());
+            e.printStackTrace();
+        } catch (PacketInstantiationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void handlePacket(IPacket packet, Player player) {
+        if (packet instanceof ScreenPacket) {
+            handleScreenPacket((ScreenPacket) packet, player);
+        } else {
+            getLogger().warning("Unhandled packet type: " + packet.getPacketId());
+        }
+    }
+
+    private void handleScreenPacket(ScreenPacket packet, Player player) {
+        getLogger().info("Received ScreenPacket from " + player.getName() + ": " + packet.getPacket());
     }
 }

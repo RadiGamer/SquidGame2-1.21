@@ -1,21 +1,14 @@
 package com.radi;
 
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.exceptions.PacketSerializationException;
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.IPacket;
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.PacketTCP;
 import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.packet.ScreenPacket;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.radi.networking.CompletionPacket;
 import com.radi.networking.packet.FabricCustomPayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket;
-import net.minecraft.network.packet.s2c.common.CustomPayloadS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.sound.SoundCategory;
 
 public class MinigameSpinScreen extends Screen {
     private static final int CENTER_RADIUS = 15;
@@ -107,6 +100,9 @@ public class MinigameSpinScreen extends Screen {
         if (button == 0) {
             isMouseHeld = true;
             message = "Gira!";
+
+            // Play mouse press sound
+            playMousePressSound();
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
@@ -138,6 +134,7 @@ public class MinigameSpinScreen extends Screen {
             if (Math.abs(angleDiff) > 5) {
                 progress += Math.abs(angleDiff) / 360.0f;
                 progress = Math.min(progress, TARGET_PROGRESS);
+
             }
 
             lastMouseAngle = mouseAngle;
@@ -148,14 +145,17 @@ public class MinigameSpinScreen extends Screen {
     }
 
     private void onGameComplete() {
-        String packetString = "SpinC";
-        IPacket packet = new ScreenPacket(packetString);
-        ClientPlayNetworking.send(new FabricCustomPayload(packet));
-        System.out.println(packetString);
-        message = "Completado!";
+        // Play completion sound
+
+        ClientPlayNetworking.send(new FabricCustomPayload(new ScreenPacket("CompleteSpin")));
         progress = TARGET_PROGRESS;
         this.client.setScreen(null);
     }
 
+    private void playMousePressSound() {
+        if (this.client != null && this.client.player != null) {
+            this.client.player.playSound(SoundEvents.BLOCK_LEVER_CLICK, 1.0F, 1.0F);
+        }
+    }
 
 }

@@ -1,8 +1,13 @@
 package com.radi;
 
+import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.packet.ScreenPacket;
+import com.radi.networking.packet.FabricCustomPayload;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -22,7 +27,7 @@ public class MinigameArrowScreen extends Screen {
     private int arrowY = 0;
     private int barX, barY;
     private boolean arrowGoingUp = true;
-    private int arrowSpeed = 2;
+    private int arrowSpeed = 4;
     private int progress = 0;
 
     private Identifier currentArrowTexture = ARROW_TEXTURE_DEFAULT;
@@ -100,14 +105,26 @@ public class MinigameArrowScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 32) { // ESPACIO
+        if (keyCode == 32) { // SPACE
             int targetTop = barY + (int) (98 * 1.2) - TARGET_HEIGHT / 2;
             int targetBottom = targetTop + TARGET_HEIGHT;
+
+            if (this.client != null && this.client.player != null) {
+                // Play click sound
+                this.client.player.playSound(SoundEvents.BLOCK_LEVER_CLICK, 1.0F, 1.0F);
+            }
 
             if (arrowY >= targetTop && arrowY + ARROW_HEIGHT <= targetBottom) {
                 progress++;
                 currentArrowTexture = ARROW_TEXTURE_SUCCESS;
                 feedbackCounter = 10;
+
+                // Play success sound
+                if (this.client != null && this.client.player != null) {
+                    this.client.player.playSound(SoundEvents.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F
+                    );
+                }
+
                 if (progress >= TOTAL_ATTEMPTS) {
                     onGameComplete();
                 } else {
@@ -115,13 +132,18 @@ public class MinigameArrowScreen extends Screen {
                 }
             } else {
                 progress = 0;
-                arrowSpeed = 2;
+                arrowSpeed = 4;
                 currentArrowTexture = ARROW_TEXTURE_FAIL;
                 feedbackCounter = 10;
+                this.client.player.playSound(SoundEvents.BLOCK_ANVIL_LAND, 1.0F, 0.8F);
+
             }
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
+
+
+
 
     @Override
     public void tick() {
@@ -139,7 +161,7 @@ public class MinigameArrowScreen extends Screen {
     }
 
     private void onGameComplete() {
-        //TODO MANDAR PAQUETE AL SERVER AQUI
+        ClientPlayNetworking.send(new FabricCustomPayload(new ScreenPacket("CompleteArrow")));
         this.client.setScreen(null);
     }
 

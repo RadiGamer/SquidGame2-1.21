@@ -43,70 +43,85 @@ public class SquidGameGame2Screens implements ModInitializer, ClientModInitializ
 
 		initializeNetworking();
 
-
-		// Register the first minigame keybinding
-		openMinigame1Key = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-				"key.squidgamegame2screens.open_minigame_1", // Translation key for first minigame
-				InputUtil.Type.KEYSYM,                       // Type of input
-				GLFW.GLFW_KEY_V,                             // Default key (N)
-				"category.squidgamegame2screens"             // Category for the keybinding
-		));
-
-		// Register the second minigame keybinding
-		openMinigame2Key = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-				"key.squidgamegame2screens.open_minigame_2", // Translation key for second minigame
-				InputUtil.Type.KEYSYM,                       // Type of input
-				GLFW.GLFW_KEY_B,                             // Default key (M)
-				"category.squidgamegame2screens"             // Category for the keybinding
-		));
-		openMinigame3Key = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-				"key.squidgamegame2screens.open_minigame_3", // Translation key for second minigame
-				InputUtil.Type.KEYSYM,                       // Type of input
-				GLFW.GLFW_KEY_N,                             // Default key (M)
-				"category.squidgamegame2screens"             // Category for the keybinding
-		));
-		openMinigame4Key = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-				"key.squidgamegame2screens.open_minigame_4", // Translation key for second minigame
-				InputUtil.Type.KEYSYM,                       // Type of input
-				GLFW.GLFW_KEY_M,                             // Default key (M)
-				"category.squidgamegame2screens"             // Category for the keybinding
-		));
-
-		// Listen for key press events
-		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(client -> {
-			if (openMinigame1Key.wasPressed() && client.currentScreen == null) {
-				// Open the first minigame screen
-				client.setScreen(new MinigameSpamScreen());
-			}
-			if (openMinigame2Key.wasPressed() && client.currentScreen == null) {
-				// Open the second minigame screen
-				client.setScreen(new MinigameCircleScreen());
-			}
-			if (openMinigame3Key.wasPressed() && client.currentScreen == null) {
-				// Open the second minigame screen
-				client.setScreen(new MinigameSpinScreen());
-			}
-			if (openMinigame4Key.wasPressed() && client.currentScreen == null) {
-				// Open the second minigame screen
-				client.setScreen(new MinigameArrowScreen());
-			}
-		});
+//		openMinigame1Key = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+//				"key.squidgamegame2screens.open_minigame_1", // Translation key for first minigame
+//				InputUtil.Type.KEYSYM,                       // Type of input
+//				GLFW.GLFW_KEY_V,                             // Default key (N)
+//				"category.squidgamegame2screens"             // Category for the keybinding
+//		));
+//
+//		// Register the second minigame keybinding
+//		openMinigame2Key = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+//				"key.squidgamegame2screens.open_minigame_2", // Translation key for second minigame
+//				InputUtil.Type.KEYSYM,                       // Type of input
+//				GLFW.GLFW_KEY_B,                             // Default key (M)
+//				"category.squidgamegame2screens"             // Category for the keybinding
+//		));
+//		openMinigame3Key = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+//				"key.squidgamegame2screens.open_minigame_3", // Translation key for second minigame
+//				InputUtil.Type.KEYSYM,                       // Type of input
+//				GLFW.GLFW_KEY_N,                             // Default key (M)
+//				"category.squidgamegame2screens"             // Category for the keybinding
+//		));
+//		openMinigame4Key = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+//				"key.squidgamegame2screens.open_minigame_4", // Translation key for second minigame
+//				InputUtil.Type.KEYSYM,                       // Type of input
+//				GLFW.GLFW_KEY_M,                             // Default key (M)
+//				"category.squidgamegame2screens"             // Category for the keybinding
+//		));
+//
+//		// Listen for key press events
+//		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(client -> {
+//			if (openMinigame1Key.wasPressed() && client.currentScreen == null) {
+//				// Open the first minigame screen
+//				client.setScreen(new MinigameSpamScreen());
+//			}
+//			if (openMinigame2Key.wasPressed() && client.currentScreen == null) {
+//				// Open the second minigame screen
+//				client.setScreen(new MinigameCircleScreen());
+//			}
+//			if (openMinigame3Key.wasPressed() && client.currentScreen == null) {
+//				// Open the second minigame screen
+//				client.setScreen(new MinigameSpinScreen());
+//			}
+//			if (openMinigame4Key.wasPressed() && client.currentScreen == null) {
+//				// Open the second minigame screen
+//				client.setScreen(new MinigameArrowScreen());
+//			}
+//		});
 	}
 
 	private static void initializeNetworking() {
 		SquidGameGame2Screens.LOGGER.info("Registering Packets for " + SquidGameGame2Screens.MOD_ID);
+
+		// Register the custom payload types
 		PayloadTypeRegistry.playC2S().register(FabricCustomPayload.CUSTOM_PAYLOAD_ID, FabricCustomPayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(FabricCustomPayload.CUSTOM_PAYLOAD_ID, FabricCustomPayload.CODEC);
-		ClientPlayNetworking.registerGlobalReceiver(FabricCustomPayload.CUSTOM_PAYLOAD_ID, (payload, context) -> context.client().execute(() -> {
-			IPacket packet = payload.packet();
-			SquidGameGame2Screens.LOGGER.info("Packet received from server: {}", packet.getPacketId());
-			switch (packet) {
-				case ScreenPacket pkt ->
 
-						System.out.println(pkt.getPacket());
-				default -> SquidGameGame2Screens.LOGGER.info("Packet received from server: UnknownPacket");
-			}
-		}));
+		ClientPlayNetworking.registerGlobalReceiver(FabricCustomPayload.CUSTOM_PAYLOAD_ID, (payload, context) -> {
+			context.client().execute(() -> {
+				IPacket packet = payload.packet();
+
+				if (packet instanceof ScreenPacket screenPacket) {
+					String screenType = screenPacket.getPacket();
+					SquidGameGame2Screens.LOGGER.info("ScreenPacket received with type: {}", screenType);
+
+					MinecraftClient client = MinecraftClient.getInstance();
+					if (client != null) {
+						switch (screenType) {
+							case "ScreenSpin" -> client.setScreen(new MinigameSpinScreen());
+							case "ScreenSpam" -> client.setScreen(new MinigameSpamScreen());
+							case "ScreenArrow" -> client.setScreen(new MinigameArrowScreen());
+							case "ScreenCircle" -> client.setScreen(new MinigameCircleScreen());
+							default -> SquidGameGame2Screens.LOGGER.warn("Unknown screen type received: {}", screenType);
+						}
+					}
+				} else {
+					SquidGameGame2Screens.LOGGER.warn("Received an unrecognized packet type: {}", packet.getPacketId());
+				}
+			});
+		});
 	}
+
 
 }

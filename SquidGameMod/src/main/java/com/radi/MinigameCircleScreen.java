@@ -1,11 +1,15 @@
 package com.radi;
 
+import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.packet.ScreenPacket;
+import com.radi.networking.packet.FabricCustomPayload;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.sound.SoundCategory;
 import org.lwjgl.glfw.GLFW;
 
 public class MinigameCircleScreen extends Screen {
@@ -16,7 +20,6 @@ public class MinigameCircleScreen extends Screen {
     private static final Identifier[] INACTIVE_TEXTURES = new Identifier[7];
     private static final Identifier[] ACTIVE_TEXTURES = new Identifier[7];
     private static final Identifier LINE_TEXTURE = Identifier.of("squidgamegame2screens", "textures/gui/juego2/linea.png");
-
 
     static {
         for (int i = 0; i < LETTERS.length; i++) {
@@ -50,13 +53,9 @@ public class MinigameCircleScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-
         super.render(context, mouseX, mouseY, delta);
-
         renderTopRow(context);
-
         renderCenterTexture(context, delta);
-
     }
 
     private void renderTopRow(DrawContext context) {
@@ -97,9 +96,6 @@ public class MinigameCircleScreen extends Screen {
             fadeAlpha = Math.max(fadeAlpha - (1f / FADE_DURATION), 0f);
         }
 
-        int alpha = (int) (fadeAlpha * 255);
-        int color = (alpha << 24) | 0xFFFFFF;
-
         context.drawTexture(
                 ACTIVE_TEXTURES[activeIndex],
                 (int) centerX,
@@ -112,7 +108,6 @@ public class MinigameCircleScreen extends Screen {
                 TEXTURE_SIZE
         );
 
-
         renderRotatedLine(context);
     }
 
@@ -120,9 +115,7 @@ public class MinigameCircleScreen extends Screen {
         context.getMatrices().push();
 
         context.getMatrices().translate(centerX + TEXTURE_SIZE / 2, centerY + TEXTURE_SIZE / 2, 0);
-
         context.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotationDegrees(spinAngle));
-
         context.getMatrices().translate(-TEXTURE_SIZE / 2, -TEXTURE_SIZE / 2, 0);
 
         context.drawTexture(
@@ -144,6 +137,7 @@ public class MinigameCircleScreen extends Screen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == getKeyForCurrentLetter()) {
             if (isInCorrectArea(spinAngle)) {
+                playSuccessSound();
                 completedCircles[activeIndex] = true;
                 if (activeIndex < LETTERS.length - 1) {
                     activeIndex++;
@@ -154,12 +148,26 @@ public class MinigameCircleScreen extends Screen {
                     onGameComplete();
                 }
             } else {
+                playFailSound();
                 resetGame();
             }
         } else {
+            playFailSound();
             resetGame();
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    private void playSuccessSound() {
+        if (this.client != null && this.client.player != null) {
+            this.client.player.playSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
+        }
+    }
+
+    private void playFailSound() {
+        if (this.client != null && this.client.player != null) {
+            this.client.player.playSound(SoundEvents.BLOCK_ANVIL_BREAK, 1.0F, 0.8F);
+        }
     }
 
     private boolean isInCorrectArea(float angle) {
@@ -189,8 +197,15 @@ public class MinigameCircleScreen extends Screen {
     }
 
     private void onGameComplete() {
-        //TODO MANDAR PAQUETE AL SERVER AQUI
+        playGameCompleteSound();
+        ClientPlayNetworking.send(new FabricCustomPayload(new ScreenPacket("CompleteCircle")));
         this.client.setScreen(null);
+    }
+
+    private void playGameCompleteSound() {
+        if (this.client != null && this.client.player != null) {
+            this.client.player.playSound(SoundEvents.ENTITY_PLAYER_LEVELUP,  1.0F, 1.0F);
+        }
     }
 
     @Override
