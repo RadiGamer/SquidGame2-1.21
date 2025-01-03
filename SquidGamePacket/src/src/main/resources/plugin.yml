@@ -1,0 +1,9 @@
+name: SquidGame2Game2
+version: '1.0-SNAPSHOT'
+main: org.imradigamer.squidGame2Game2.SquidGame2Game2
+api-version: '1.21'
+authors: [ ImRadiGamer ]
+commands:
+  screen:
+    usage: /screen <ScreenType> <Player>
+    description: Le abre la pantalla al jugador
