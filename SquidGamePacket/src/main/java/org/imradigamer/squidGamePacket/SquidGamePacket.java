@@ -7,9 +7,11 @@ import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommo
 import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.packet.ScreenPacket;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
@@ -17,11 +19,34 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.UUID;
 
 public final class SquidGamePacket extends JavaPlugin implements PluginMessageListener {
 
+    private FileConfiguration config;
+    private HashMap<UUID, Integer> playerTeams;
+    private PlayerMovementListener playerMovementListener;
+    private RaceManager raceManager;
+
+
     @Override
     public void onEnable() {
+
+        saveDefaultConfig();
+        config = getConfig();
+        playerTeams = new HashMap<>();
+
+        raceManager = new RaceManager(this);
+        getCommand("nextrace").setExecutor(new NextRaceCommand(raceManager));
+
+        playerMovementListener = new PlayerMovementListener(this); // Initialize the listener
+        getServer().getPluginManager().registerEvents(playerMovementListener, this);
+
+        getCommand("areadefine").setExecutor(new CommandHandler(this));
+        getCommand("teamdefine").setExecutor(new CommandHandler(this));
+
+
         // Register the outgoing and incoming plugin channels
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, PacketTCP.PACKET_CHANNEL);
         this.getServer().getMessenger().registerIncomingPluginChannel(this, PacketTCP.PACKET_CHANNEL, this);
@@ -31,6 +56,18 @@ public final class SquidGamePacket extends JavaPlugin implements PluginMessageLi
             getCommand("screen").setExecutor(this);
         }
     }
+
+    public FileConfiguration getConfiguration() {
+        return config;
+    }
+    public PlayerMovementListener getPlayerMovementListener() {
+        return playerMovementListener;
+    }
+
+    public HashMap<UUID, Integer> getPlayerTeams() {
+        return playerTeams;
+    }
+
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -45,17 +82,16 @@ public final class SquidGamePacket extends JavaPlugin implements PluginMessageLi
             return true;
         }
 
-        String minigame = args[0];
+        String string = args[0];
         String playerName = args[1];
 
-        // Get the online Player by name
         Player target = Bukkit.getPlayerExact(playerName);
         if (target == null) {
             sender.sendMessage("Player " + playerName + " is not online!");
             return true;
         }
 
-        sendStringScreenPacketToClient(target, minigame);
+        sendStringScreenPacketToClient(target, string);
         return true;
     }
 
@@ -104,7 +140,25 @@ public final class SquidGamePacket extends JavaPlugin implements PluginMessageLi
         }
     }
 
-    private void handleScreenPacket(ScreenPacket packet, Player player) {
+    public void handleScreenPacket(ScreenPacket packet, Player player) {
+        String packetString = packet.getPacket();
+
         getLogger().info("Received ScreenPacket from " + player.getName() + ": " + packet.getPacket());
+        RaceManager raceManager = this.getRaceManager();
+
+        switch (packetString) {
+            case "CompleteSpin":
+            case "CompleteSpam":
+            case "CompleteArrow":
+            case "CompleteCircle":
+                raceManager.handleMinigameCompletion(player, packetString);
+                break;
+            default:
+                getLogger().warning("Unhandled packet: " + packetString);
+        }
     }
+    public RaceManager getRaceManager() {
+        return raceManager;
+    }
+
 }
