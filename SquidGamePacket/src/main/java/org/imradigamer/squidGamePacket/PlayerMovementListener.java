@@ -36,17 +36,6 @@ public class PlayerMovementListener implements Listener {
         Player player = event.getPlayer();
         Location loc = player.getLocation();
         Integer team = plugin.getPlayerTeams().get(player.getUniqueId());
-        if (team == null) {
-            return; // Player is not part of any team
-        }
-
-        RaceManager raceManager = plugin.getRaceManager();
-
-        int checkpointNumber = raceManager.detectCheckpointNumber(loc, team);
-
-        if (checkpointNumber != -1) {
-            raceManager.handleCheckpoint(player, loc);
-        }
 
         if (!isTimerActive) {
             return; // Ignore movements if the timer is not active

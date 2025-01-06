@@ -1,22 +1,28 @@
 package org.imradigamer.squidGamePacket;
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
-public class TeamDefineCommand {
+public class TeamDefineCommand implements CommandExecutor {
 
     private final SquidGamePacket plugin;
+    private final PlayerMovementListener playerMovementListener;
+    private final Map<Integer, List<UUID>> finalizedTeams = new HashMap<>();
+    private boolean timerActive = false;
 
-    public TeamDefineCommand(SquidGamePacket plugin) {
+    public TeamDefineCommand(SquidGamePacket plugin, PlayerMovementListener listener) {
         this.plugin = plugin;
+        this.playerMovementListener = listener;
     }
 
-    public boolean handleCommand(CommandSender sender, String[] args) {
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage("Este comando solo puede ser usado por jugadores.");
             return true;
@@ -24,50 +30,61 @@ public class TeamDefineCommand {
 
         Player player = (Player) sender;
 
-        player.sendMessage("La dinámica de equipos ha comenzado. Se bloquearán en 10 minutos.");
+        if (args.length != 0) {
+            player.sendMessage("Uso: /teamdefine (sin argumentos)");
+            return true;
+        }
 
-        // Start the timer using the listener instance
-        PlayerMovementListener listener = plugin.getPlayerMovementListener();
-        listener.startTimer();
+        if (timerActive) {
+            player.sendMessage("El temporizador ya está en marcha.");
+            return true;
+        }
 
-        startTeamLockingTask(listener);
+        player.sendMessage("El temporizador de formación de equipos ha comenzado. Tienen 30 segundos para entrar a sus áreas de equipo.");
+
+        timerActive = true;
+        playerMovementListener.startTimer();
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                timerActive = false;
+                playerMovementListener.stopTimer();
+                player.sendMessage("El tiempo ha terminado. Los equipos están bloqueados.");
+                finalizeTeams();
+            }
+        }.runTaskLater(plugin, 20L * 30); // 30-second countdown
 
         return true;
     }
 
-    private void startTeamLockingTask(PlayerMovementListener listener) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                listener.stopTimer();
-                lockTeams();
-                highlightPlayersWithoutTeam();
-            }
-        }.runTaskLater(plugin, 10 * 60 * 20); // 10 minutes in ticks
+    private void finalizeTeams() {
+        finalizedTeams.clear();
+
+        plugin.getPlayerTeams().forEach((uuid, teamNumber) -> {
+            finalizedTeams.computeIfAbsent(teamNumber, k -> new ArrayList<>()).add(uuid);
+        });
+
+        Bukkit.getLogger().info("Equipos finalizados: " + finalizedTeams);
     }
 
-    private void lockTeams() {
-        HashMap<UUID, Integer> playerTeams = plugin.getPlayerTeams();
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            UUID playerId = player.getUniqueId();
-            if (!playerTeams.containsKey(playerId)) {
-                player.sendMessage("No estás en un equipo. ¡Encuentra uno rápidamente!");
-            } else {
-                player.sendMessage("Los equipos ahora están bloqueados.");
-            }
-        }
+    public Map<Integer, List<UUID>> getFinalizedTeams() {
+        return Collections.unmodifiableMap(finalizedTeams);
     }
 
-    private void highlightPlayersWithoutTeam() {
-        HashMap<UUID, Integer> playerTeams = plugin.getPlayerTeams();
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            UUID playerId = player.getUniqueId();
-            if (!playerTeams.containsKey(playerId)) {
-                player.setGlowing(true);
-                player.sendMessage("¡Estás destacado porque no tienes equipo!");
-            } else {
-                player.setGlowing(false);
+    public List<UUID> getTeamMembers(int teamNumber) {
+        return finalizedTeams.getOrDefault(teamNumber, Collections.emptyList());
+    }
+
+    public boolean isTimerActive() {
+        return timerActive;
+    }
+    public Integer getTeamForPlayer(UUID playerUUID) {
+        for (Map.Entry<Integer, List<UUID>> entry : finalizedTeams.entrySet()) {
+            if (entry.getValue().contains(playerUUID)) {
+                return entry.getKey();
             }
         }
+        return null;
     }
 }

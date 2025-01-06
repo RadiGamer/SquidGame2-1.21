@@ -1,10 +1,10 @@
-package com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network;
+package com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.network;
 
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.exceptions.PacketInstantiationException;
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.exceptions.PacketNotFoundException;
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.exceptions.PacketRegistrationException;
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.exceptions.PacketSerializationException;
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.packet.*;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.exceptions.PacketInstantiationException;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.exceptions.PacketNotFoundException;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.exceptions.PacketRegistrationException;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.exceptions.PacketSerializationException;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.network.packet.*;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.io.ByteArrayDataInput;

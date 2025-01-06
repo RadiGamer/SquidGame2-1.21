@@ -1,7 +1,8 @@
+
 package com.radi;
 
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.IPacket;
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.packet.ScreenPacket;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.network.IPacket;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.network.packet.ScreenPacket;
 import com.radi.networking.packet.FabricCustomPayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
@@ -304,7 +305,4 @@ public class SquidGameGame2Screens implements ModInitializer, ClientModInitializ
 			});
 		});
 	}
-
-
-
 }

@@ -7,3 +7,15 @@ commands:
   screen:
     usage: /screen <ScreenType> <Player>
     description: Le abre la pantalla al jugador
+  areadefine:
+    usage: /areadefine
+    description: Define las areas por equipo
+  teamdefine:
+    usage: /teamdefine
+    description: Comienza la definicion de equipos
+  nextrace:
+    usage: /nextrace
+    description: Comienza la siguiente carrera
+  teamget:
+    usage: /teamget <nick>
+    description: Te dice el team en el que esta alguien

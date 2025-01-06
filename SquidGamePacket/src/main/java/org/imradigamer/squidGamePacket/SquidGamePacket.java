@@ -1,10 +1,10 @@
 package org.imradigamer.squidGamePacket;
 
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.exceptions.PacketInstantiationException;
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.exceptions.PacketSerializationException;
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.IPacket;
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.PacketTCP;
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.packet.ScreenPacket;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.exceptions.PacketInstantiationException;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.exceptions.PacketSerializationException;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.network.IPacket;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.network.PacketTCP;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.network.packet.ScreenPacket;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import lombok.Getter;
@@ -27,7 +27,9 @@ public final class SquidGamePacket extends JavaPlugin implements PluginMessageLi
     private FileConfiguration config;
     private HashMap<UUID, Integer> playerTeams;
     private PlayerMovementListener playerMovementListener;
+    @Getter
     private RaceManager raceManager;
+    private TeamDefineCommand teamDefineCommand;
 
 
     @Override
@@ -37,14 +39,23 @@ public final class SquidGamePacket extends JavaPlugin implements PluginMessageLi
         config = getConfig();
         playerTeams = new HashMap<>();
 
-        raceManager = new RaceManager(this);
-        getCommand("nextrace").setExecutor(new NextRaceCommand(raceManager));
-
         playerMovementListener = new PlayerMovementListener(this); // Initialize the listener
+        teamDefineCommand = new TeamDefineCommand(this, playerMovementListener);
+
+
+        raceManager = new RaceManager(this,teamDefineCommand, 40);
+        getCommand("nextrace").setExecutor(new NextRaceCommand(raceManager));
+        getCommand("teamdefine").setExecutor(teamDefineCommand);
+
+
+
         getServer().getPluginManager().registerEvents(playerMovementListener, this);
 
         getCommand("areadefine").setExecutor(new CommandHandler(this));
-        getCommand("teamdefine").setExecutor(new CommandHandler(this));
+        getCommand("teamget").setExecutor(new CommandHandler(this));
+        getCommand("teamget").setExecutor(new TeamGetCommand(teamDefineCommand));
+
+
 
 
         // Register the outgoing and incoming plugin channels
@@ -144,21 +155,20 @@ public final class SquidGamePacket extends JavaPlugin implements PluginMessageLi
         String packetString = packet.getPacket();
 
         getLogger().info("Received ScreenPacket from " + player.getName() + ": " + packet.getPacket());
-        RaceManager raceManager = this.getRaceManager();
+
+        raceManager.handleScreenPacket(packetString, player);
+
 
         switch (packetString) {
             case "CompleteSpin":
             case "CompleteSpam":
             case "CompleteArrow":
             case "CompleteCircle":
-                raceManager.handleMinigameCompletion(player, packetString);
+                //TODO Hacer algo con los paquetes recibidos
                 break;
             default:
                 getLogger().warning("Unhandled packet: " + packetString);
         }
-    }
-    public RaceManager getRaceManager() {
-        return raceManager;
     }
 
 }

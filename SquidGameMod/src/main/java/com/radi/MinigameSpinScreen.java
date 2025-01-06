@@ -1,14 +1,12 @@
 package com.radi;
 
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.packet.ScreenPacket;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.network.packet.ScreenPacket;
 import com.radi.networking.packet.FabricCustomPayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.sound.SoundCategory;
 
 public class MinigameSpinScreen extends Screen {
     private static final int CENTER_RADIUS = 15;

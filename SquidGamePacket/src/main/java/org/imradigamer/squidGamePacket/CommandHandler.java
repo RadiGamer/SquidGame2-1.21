@@ -16,8 +16,6 @@ public class CommandHandler implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("areadefine")) {
             return new AreaDefineCommand(plugin).handleCommand(sender, args);
-        } else if (command.getName().equalsIgnoreCase("teamdefine")) {
-            return new TeamDefineCommand(plugin).handleCommand(sender, args);
         }
         return false;
     }
