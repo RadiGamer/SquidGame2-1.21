@@ -1,7 +1,7 @@
 package com.radi.networking.packet;
 
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.exceptions.PacketSerializationException;
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.PacketTCP;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.exceptions.PacketSerializationException;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.network.PacketTCP;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import io.netty.buffer.ByteBuf;
@@ -9,7 +9,7 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.IPacket;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.network.IPacket;
 
 
 public record FabricCustomPayload(IPacket packet) implements CustomPayload {
@@ -23,6 +23,7 @@ public record FabricCustomPayload(IPacket packet) implements CustomPayload {
                         ByteArrayDataInput in = ByteStreams.newDataInput(data);
                         return PacketTCP.read(in);
                     } catch (Exception e) {
+                        e.printStackTrace();
                         return null;
                     }
                 }

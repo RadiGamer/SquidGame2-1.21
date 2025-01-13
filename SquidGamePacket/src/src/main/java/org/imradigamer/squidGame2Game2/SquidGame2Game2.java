@@ -1,10 +1,10 @@
 package org.imradigamer.squidGame2Game2;
 
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.exceptions.PacketSerializationException;
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.IPacket;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.exceptions.PacketSerializationException;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.network.IPacket;
 
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.PacketTCP;
-import com.github.razorplay01.minecraft_events_utiles.minecrafteventsutilescommon.network.packet.ScreenPacket;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.network.PacketTCP;
+import com.github.razorplay01.minecraft_utiles.minecrafteventsutilescommon.network.packet.ScreenPacket;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

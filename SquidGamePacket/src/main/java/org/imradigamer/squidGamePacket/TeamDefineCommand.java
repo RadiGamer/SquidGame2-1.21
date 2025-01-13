@@ -53,7 +53,7 @@ public class TeamDefineCommand implements CommandExecutor {
                 player.sendMessage("El tiempo ha terminado. Los equipos están bloqueados.");
                 finalizeTeams();
             }
-        }.runTaskLater(plugin, 20L * 30); // 30-second countdown
+        }.runTaskLater(plugin, 20L * 60); // 60-second countdown
 
         return true;
     }

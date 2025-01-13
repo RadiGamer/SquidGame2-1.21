@@ -9,6 +9,7 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -43,9 +44,31 @@ public final class SquidGamePacket extends JavaPlugin implements PluginMessageLi
         teamDefineCommand = new TeamDefineCommand(this, playerMovementListener);
 
 
+
+
+
         raceManager = new RaceManager(this,teamDefineCommand, 40);
         getCommand("nextrace").setExecutor(new NextRaceCommand(raceManager));
         getCommand("teamdefine").setExecutor(teamDefineCommand);
+
+        Location course1Start = new Location(Bukkit.getWorld("world"), -428, 66, -526);
+        Location course2Start = new Location(Bukkit.getWorld("world"), -428, 66, -472);
+        raceManager.setCourseStartLocations(course1Start, course2Start);
+
+        raceManager.setFinishArea(1, new Location(Bukkit.getWorld("world"), -429, 66, -532), new Location(Bukkit.getWorld("world"), -429, 69, -521));
+        raceManager.setFinishArea(2, new Location(Bukkit.getWorld("world"), -429, 66, -479), new Location(Bukkit.getWorld("world"), -429, 69, -468));
+
+        raceManager.addPacketArea(2, new Location(Bukkit.getWorld("world"), -385, 66, -479), new Location(Bukkit.getWorld("world"), -385, 69, -468), "ScreenSpam");
+//        raceManager.addPacketArea(2, new Location(Bukkit.getWorld("world"), -372, 66, -415), new Location(Bukkit.getWorld("world"), -383, 69, -415), "ScreenArrow");
+        raceManager.addPacketArea(2, new Location(Bukkit.getWorld("world"), -436, 66, -401), new Location(Bukkit.getWorld("world"), -436, 69, -414),"ScreenCircle");
+        raceManager.addPacketArea(2, new Location(Bukkit.getWorld("world"), -450, 66, -447), new Location(Bukkit.getWorld("world"), -439, 69, -447),"ScreenSpam");
+        raceManager.addPacketArea(1, new Location(Bukkit.getWorld("world"), -438, 66, -479), new Location(Bukkit.getWorld("world"), -438, 69, -468),"ScreenArrow");
+
+        raceManager.addPacketArea(1, new Location(Bukkit.getWorld("world"), -385, 66, -532), new Location(Bukkit.getWorld("world"), -385, 69, -521),"ScreenSpam");
+//        raceManager.addPacketArea(1, new Location(Bukkit.getWorld("world"), -382, 66, -585), new Location(Bukkit.getWorld("world"), -372, 69, -585 ),"ScreenArrow");
+        raceManager.addPacketArea(1, new Location(Bukkit.getWorld("world"), -436, 66, -588), new Location(Bukkit.getWorld("world"), -436, 69, -599),"ScreenCircle");
+        raceManager.addPacketArea(1, new Location(Bukkit.getWorld("world"), -439, 66, -553), new Location(Bukkit.getWorld("world"), -450, 69, -553),"ScreenSpam");
+        raceManager.addPacketArea(2, new Location(Bukkit.getWorld("world"), -438, 66, -532), new Location(Bukkit.getWorld("world"), -438, 69, -521),"ScreenArrow");
 
 
 

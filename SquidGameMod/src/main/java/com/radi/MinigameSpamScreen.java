@@ -18,7 +18,6 @@ public class MinigameSpamScreen extends Screen {
 
     private int progress = 0;
     private int maxProgress = 100;
-    private int DESCENT_RATE = 1;
     private boolean gameOver = false;
     private boolean lastKeyPressed = false;
     private long lastKeyPressTime = 0;
@@ -67,7 +66,7 @@ public class MinigameSpamScreen extends Screen {
     public void tick() {
         if (!gameOver) {
             if (progress > 0) {
-                progress = Math.max(progress - DESCENT_RATE, 0);
+                progress = Math.max(progress, 0);
             }
         }
     }

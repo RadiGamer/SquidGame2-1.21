@@ -7,12 +7,15 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.Identifier;
+import net.minecraft.client.util.math.MatrixStack;
 
 public class MinigameSpinScreen extends Screen {
     private static final int CENTER_RADIUS = 15;
     private static final int BAR_HEIGHT = 200;
     private static final int BAR_WIDTH = 20;
     private static final float TARGET_PROGRESS = 10.0f;
+    private static final Identifier TROMPO_TEXTURE = Identifier.of("squidgamegame2screens", "textures/gui/trompo.png");
 
     private float progress = 0.0f;
     private float mouseAngle = 0.0f;
@@ -35,23 +38,31 @@ public class MinigameSpinScreen extends Screen {
         // Darkened background overlay
         context.fill(0, 0, this.width, this.height, 0xAA000000);
 
-        renderCenterDot(context, centerX, centerY);
+        renderCenterTexture(context, centerX, centerY, mouseAngle);
         renderProgressBar(context, centerX - 50, centerY);
         renderMessage(context, centerX, centerY + 120);
     }
 
-    private void renderCenterDot(DrawContext context, int centerX, int centerY) {
-        // Add a glowing effect to the center dot
-        context.fill(
-                centerX - CENTER_RADIUS - 5, centerY - CENTER_RADIUS - 5,
-                centerX + CENTER_RADIUS + 5, centerY + CENTER_RADIUS + 5,
-                0xAA00FF00 // Glow effect
+    private void renderCenterTexture(DrawContext context, int centerX, int centerY, float angle) {
+        MatrixStack matrices = context.getMatrices();
+
+        matrices.push();
+        matrices.translate(centerX, centerY, 0);
+        matrices.multiply(net.minecraft.util.math.RotationAxis.POSITIVE_Z.rotationDegrees(angle));
+
+        int textureSize = 100;
+        int halfSize = textureSize / 2;
+
+        // Draw texture
+        context.drawTexture(
+                TROMPO_TEXTURE, // Identifier for the texture
+                -halfSize, -halfSize, // Position relative to the center
+                0, 0, // Texture position
+                textureSize, textureSize, // Texture dimensions
+                textureSize, textureSize // Image dimensions
         );
-        context.fill(
-                centerX - CENTER_RADIUS, centerY - CENTER_RADIUS,
-                centerX + CENTER_RADIUS, centerY + CENTER_RADIUS,
-                0xFF00FF00 // Center circle
-        );
+
+        matrices.pop();
     }
 
     private void renderProgressBar(DrawContext context, int x, int centerY) {
@@ -130,7 +141,7 @@ public class MinigameSpinScreen extends Screen {
             if (angleDiff > 180) angleDiff -= 360;
 
             if (Math.abs(angleDiff) > 5) {
-                progress += Math.abs(angleDiff) / 360.0f;
+                progress += Math.abs(angleDiff) / 180.0f; // Increased spin impact
                 progress = Math.min(progress, TARGET_PROGRESS);
 
             }
@@ -155,5 +166,4 @@ public class MinigameSpinScreen extends Screen {
             this.client.player.playSound(SoundEvents.BLOCK_LEVER_CLICK, 1.0F, 1.0F);
         }
     }
-
 }

@@ -7,15 +7,25 @@ commands:
   screen:
     usage: /screen <ScreenType> <Player>
     description: Le abre la pantalla al jugador
+    permission: squidgame.admin
+    permission-message: No tienes permiso para usar este comando.
   areadefine:
     usage: /areadefine
     description: Define las areas por equipo
+    permission: squidgame.admin
+    permission-message: No tienes permiso para usar este comando.
   teamdefine:
     usage: /teamdefine
     description: Comienza la definicion de equipos
+    permission: squidgame.admin
+    permission-message: No tienes permiso para usar este comando.
   nextrace:
     usage: /nextrace
     description: Comienza la siguiente carrera
+    permission: squidgame.admin
+    permission-message: No tienes permiso para usar este comando.
   teamget:
     usage: /teamget <nick>
     description: Te dice el team en el que esta alguien
+    permission: squidgame.admin
+    permission-message: No tienes permiso para usar este comando.

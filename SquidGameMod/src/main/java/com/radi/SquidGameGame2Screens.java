@@ -8,26 +8,18 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.server.command.CommandManager;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
-import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +39,10 @@ public class SquidGameGame2Screens implements ModInitializer, ClientModInitializ
 	private static KeyBinding openMinigame2Key;
 	private static KeyBinding openMinigame3Key;
 	private static KeyBinding openMinigame4Key;
+
+	private static final Identifier TEXTURE_A = Identifier.of("squidgamegame2screens", "textures/gui/key_a.png");
+	private static final Identifier TEXTURE_D = Identifier.of("squidgamegame2screens", "textures/gui/key_d.png");
+
 
 	private Vec3d lastValidPosition;
 
@@ -134,6 +130,33 @@ public class SquidGameGame2Screens implements ModInitializer, ClientModInitializ
 //			}
 //		});
 	}
+	private void renderLetter(DrawContext context) {
+		MinecraftClient client = MinecraftClient.getInstance();
+		if (client == null || client.player == null) {
+			return;
+		}
+
+		MatrixStack matrices = context.getMatrices();
+
+		// Message to display
+		String message = "Presiona";
+
+		// Center the text and texture
+		int screenWidth = client.getWindow().getScaledWidth();
+		int screenHeight = client.getWindow().getScaledHeight();
+		int x = screenWidth / 2;
+		int y = screenHeight / 3;
+
+		// Draw the message
+		context.drawTextWithShadow(client.textRenderer, Text.literal(message).formatted(Formatting.YELLOW), x - 25, y - 10, 0xFFFFFF);
+
+		// Choose the texture based on the current letter (A or D)
+		Identifier texture = "A".equals(currentLetter) ? TEXTURE_A : TEXTURE_D;
+
+		// Draw the texture below the message
+		context.drawTexture(texture, x - 16, y + 10, 0, 0, 32, 32, 17, 27);
+	}
+
 
 	private void disableDefaultMovement(ClientPlayerEntity player) {
 		// Stop all movement
@@ -148,7 +171,7 @@ public class SquidGameGame2Screens implements ModInitializer, ClientModInitializ
 	}
 
 	private void movePlayerForward(ClientPlayerEntity player) {
-		double speed = 0.5;
+		double speed = 1;
 		Vec3d forwardVector = player.getRotationVec(1.0F).multiply(speed);
 
 		// Update last valid position
@@ -200,30 +223,6 @@ public class SquidGameGame2Screens implements ModInitializer, ClientModInitializ
 		movementEnabled = enabled;
 	}
 
-	private void renderLetter(DrawContext context) {
-		MinecraftClient client = MinecraftClient.getInstance();
-		if (client == null || client.player == null) {
-			return;
-		}
-
-		MatrixStack matrices = context.getMatrices();
-
-		// Message in Spanish
-		String message = "Presiona la tecla:";
-		String letter = currentLetter;
-
-		// Center the text
-		int screenWidth = client.getWindow().getScaledWidth();
-		int screenHeight = client.getWindow().getScaledHeight();
-		int x = screenWidth / 2;
-		int y = screenHeight / 3;
-
-		// Draw the message
-		context.drawTextWithShadow(client.textRenderer, Text.literal(message).formatted(Formatting.YELLOW), x - 50, y - 10, 0xFFFFFF);
-
-		// Draw the letter (Beautified)
-		context.drawTextWithShadow(client.textRenderer, Text.literal(letter).formatted(Formatting.BOLD, Formatting.GREEN), x - 5, y + 10, 0xFFFFFF);
-	}
 	private void handleCustomMovement(MinecraftClient client) {
 		if (!movementEnabled) return;
 
