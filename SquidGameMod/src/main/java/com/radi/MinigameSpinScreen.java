@@ -14,7 +14,7 @@ public class MinigameSpinScreen extends Screen {
     private static final int CENTER_RADIUS = 15;
     private static final int BAR_HEIGHT = 200;
     private static final int BAR_WIDTH = 20;
-    private static final float TARGET_PROGRESS = 10.0f;
+    private static final float TARGET_PROGRESS = 70.0f;
     private static final Identifier TROMPO_TEXTURE = Identifier.of("squidgamegame2screens", "textures/gui/trompo.png");
 
     private float progress = 0.0f;

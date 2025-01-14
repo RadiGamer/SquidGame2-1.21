@@ -8,6 +8,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -507,22 +509,11 @@ public class RaceManager {
 
 
         public void handleScreenPacket(String packetString, Player player) {
-            int teamNumber = teamDefineCommand.getTeamForPlayer(player.getUniqueId());
-            if (teamNumber == -1) {
-                plugin.getLogger().info("Player " + player.getName() + " is not part of any team.");
-                return;
-            }
 
-            // Update teamPacketProgress
-            teamPacketProgress.putIfAbsent(teamNumber, new HashMap<>());
-            Map<UUID, Set<String>> playerProgress = teamPacketProgress.get(teamNumber);
-            playerProgress.putIfAbsent(player.getUniqueId(), new HashSet<>());
-            playerProgress.get(player.getUniqueId()).add(packetString);
+            plugin.givePoints(player, 1);
 
-            plugin.getLogger().info("Updated packet progress for Team " + teamNumber + ": " + playerProgress);
+            teleportPlayerInViewDirection(player);
 
-            // Revalidate team progress
-            checkTeamProgress(teamNumber);
         }
 
 
@@ -639,10 +630,8 @@ public class RaceManager {
 
     public void handleScreenPacket(String packetString, Player player) {
         for (RaceTask raceTask : activeRaces) {
-            if (raceTask.isPlayerInRace(player)) {
                 raceTask.handleScreenPacket(packetString, player);
                 return;
-            }
         }
         plugin.getLogger().warning("No active race found for player: " + player.getName());
     }
@@ -694,4 +683,24 @@ public class RaceManager {
         int seconds = timeInSeconds % 60;
         return String.format("%d:%02d", minutes, seconds);
     }
+
+    public void teleportPlayerInViewDirection(Player player) {
+        // Get the player's current location
+        Location currentLocation = player.getLocation();
+
+        // Get the direction the player is facing
+        @NotNull Vector direction = currentLocation.getDirection();
+
+        direction.normalize();
+
+        // Scale the direction vector to 2 blocks
+        direction.multiply(2);
+
+        // Add the scaled direction vector to the current location
+        Location targetLocation = currentLocation.add(direction);
+
+        // Teleport the player to the target location
+        player.teleport(targetLocation);
+    }
+
 }

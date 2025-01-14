@@ -8,6 +8,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.sound.SoundCategory;
 import org.lwjgl.glfw.GLFW;
 
 public class MinigameSpamScreen extends Screen {
@@ -18,6 +19,7 @@ public class MinigameSpamScreen extends Screen {
 
     private int progress = 0;
     private int maxProgress = 100;
+    private int DESCENT_RATE = 1;
     private boolean gameOver = false;
     private boolean lastKeyPressed = false;
     private long lastKeyPressTime = 0;
@@ -36,7 +38,7 @@ public class MinigameSpamScreen extends Screen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_SPACE && !gameOver) {
             if (!lastKeyPressed || System.currentTimeMillis() - lastKeyPressTime > SPAM_THRESHOLD) {
-                progress = Math.min(progress + 3, maxProgress);
+                progress = Math.min(progress + 5, maxProgress);
                 lastKeyPressed = true;
                 lastKeyPressTime = System.currentTimeMillis();
 
@@ -66,7 +68,7 @@ public class MinigameSpamScreen extends Screen {
     public void tick() {
         if (!gameOver) {
             if (progress > 0) {
-                progress = Math.max(progress, 0);
+                progress = Math.max(progress - DESCENT_RATE, 0);
             }
         }
     }
